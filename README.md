@@ -14,7 +14,7 @@ in this project we will make a letterbox who will inform the owner when a letter
 There will be three source of information , the GSM module, an LCD display, and a cloud service. the real data information will be sent to all these three module at same time.
 the owner of letterbox will get text massege of delivery, the number of letter will be display on lcd display and also the website will be updated with the latest data.
 
-for this project we will use only c language and the micrcontroller we will use is Beagle Bone Black. our total tasks for completion is 6 starting from 25 june to 21 august 2020.
+for this project we will use only c language and the micrcontroller we will use is Beagle Bone Black. our total tasks for completion of project is 6, starting from 25 june to 21 august 2020.
 
 TASK 1: Finalizing hardware requirements & getting hardware.
 
