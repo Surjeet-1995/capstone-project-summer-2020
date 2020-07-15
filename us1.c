@@ -1,3 +1,7 @@
+// this code is use only one ultrasonic sensor with beagle bone black//
+
+
+
 #include <iobb.h> 
 #include <time.h>  //Time Library   
 #include <stdio.h>
