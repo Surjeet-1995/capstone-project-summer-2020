@@ -1,0 +1,84 @@
+// this code is just for distance measurment by sensor 1.
+#include <iobb.h> 
+#include <time.h>  //Time Library   
+#include <stdio.h>
+#include <unistd.h> //defines miscellaneous symbolic constants and types, and declares miscellaneous functions
+
+
+long int start, stop, count; //To store Time of UltraSonic Sensor (TRIG & ECHO)
+
+clock_t before, end; //To track time of sensors
+
+
+
+int main(void)  
+{  
+  iolib_init();  // intializing the libraries
+  iolib_setdir(8, 10, DigitalOut); // setting the gpio ports
+  pin_low(8, 10); 
+  iolib_setdir(8, 9, DigitalIn);  
+  printf("STARTED \n");
+  iolib_delay ms(60); //delay in between trigger
+  
+  while(1)    // in this condition i will high and low the gpio pin and record the time in clock function
+  { 
+	printf("TRIGERRING \n");
+    pin_high(8, 10);  //pin high
+    usleep(10); 
+    pin_low(8, 10);  //pin low
+    
+    //iolib_delay_ms(1);
+    while(is_low(8, 9))
+    {		//printf(".");
+			count+= 1;
+			before = clock();  //so when its low the data will storde in before integer
+			
+			if(count > 20000)   //the threshold is 20000 miliseconds
+			{
+				printf("Kindly Check Wiring\n");
+				count = 0;
+				break;
+			}
+			
+			
+	}
+	
+	while(is_high(8, 9))   //when pin is high
+	{	
+		//printf("_");
+		count += 1;
+		end = clock();   //the data will be stored in end integer
+		if(count > 20000)
+			{
+				printf("Kindly Check Wiring\n");
+				count = 0;
+				break;
+			}
+			
+	}
+    
+    clock_t difference = end - before; // in this function diffrence is calculated
+    
+    if( count > 0) 
+    {
+    printf("%d    ",before); // the trig pulse time
+    printf("%d    ",end);    // the time it reaches to reach echo pin
+    printf("%d    Distance: ",difference); // the diffrence between time of sound waves
+    printf("%d cm. \n",difference/30); // divided by 30 to change the unit to centimeters
+	}
+    
+    printf("\n");
+    pin_low(8, 10);
+    iolib_delay_ms(60);
+    start = 0;
+    count=0;
+    
+      iolib_delay_ms(999); // the delay of output 
+  }  
+  iolib_free();  
+  return(0);  
+  
+  
+}  
+
+
