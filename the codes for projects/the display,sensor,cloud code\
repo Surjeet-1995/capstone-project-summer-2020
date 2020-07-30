@@ -234,7 +234,7 @@ int main(void)
 	}
 	if(distance1 > 10 && cflag1 == 0) // When letter passes and no more in front of sensor
     {
-		cflag1 = 1; // Make flag as 1 means ready to sense another letter
+		cflag1 = 1; // Make flag as 1 means letter is counted 
 	}
 	
 	
@@ -249,7 +249,7 @@ int main(void)
 	}
 	if(distance2 > 10 && cflag2 == 0) // When letter passes and no more in front of sensor
     {
-		cflag2 = 1; // Make flag as 1 means ready to sense another letter
+		cflag2 = 1; // Make flag as 1 means letter is removed 
 	}
 	
 	printf("Current Letter Count:  %d  \n", letterCount);
