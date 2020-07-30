@@ -1,0 +1,248 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <errno.h>
+#include <linux/i2c.h>
+#include <linux/i2c-dev.h>
+#include <sys/ioctl.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdio.h> //Standard C input Output Library
+#include <unistd.h> //defines miscellaneous symbolic constants and types, and declares miscellaneous functions
+#include <string.h> //C Library for various String Operations
+#include <termios.h> // Contains the definitions used by the terminal I/O interfaces 
+
+#include <sys/types.h> //definitions for types like size_t , ssize_t
+#include <sys/stat.h> //header defines the structure of the data returned by the functions fstat(), lstat(), and stat(), give file size
+#include <fcntl.h> // FIle control, Open, clos
+#include <stdbool.h> 
+
+
+void showNum(int a);
+
+static const char* charmap[] = { 
+
+  "0x3F",   // 0
+  "0x06",   // 1
+  "0x5B",   // 2
+  "0x4F",   // 3
+  "0x66",   // 4
+  "0x6D",   // 5
+  "0x7D",   // 6
+  "0x07",   // 7
+  "0x7F",   // 8
+  "0x6F",   // 9
+  "0x77",   // A
+  "0x7C",   // B
+  "0x39",   // C
+  "0x5E",   // D
+  "0x79",   // E
+  "0x71",   // F
+  "0x00",   // space
+  "0x40",   // minus
+};
+
+
+void main() 
+{
+int num = 0;
+
+int file;
+char *filename = "/dev/i2c-2";
+
+
+/*
+char buf[4];
+if ((file = open(filename, O_RDWR)) < 0) {
+    // ERROR HANDLING: you can check errno to see what went wrong 
+    perror("Failed to open the i2c bus 1 \n");
+    exit(1);
+}
+
+int addr = 0x70;          // The I2C address of the ADC
+
+if (ioctl(file, I2C_SLAVE, addr) < 0) {
+    printf("Failed to acquire bus access and/or talk to slave.\n");
+    // ERROR HANDLING; you can check errno to see what went wrong
+    exit(1);
+}
+
+
+buf[0] = 0x21;
+if (write(file,buf,1) != 1) {
+    // ERROR HANDLING: i2c transaction failed
+    printf("Failed to write to the i2c bus 1 .\n");
+    
+}
+
+buf[0] = 0x81;
+if (write(file,buf,1) != 1) {
+    //ERROR HANDLING: i2c transaction failed
+    printf("Failed to write to the i2c bus 2 .\n");
+    
+}
+
+buf[0] = 0xEF;
+if (write(file,buf,1) != 1) {
+    // ERROR HANDLING: i2c transaction failed
+    printf("Failed to write to the i2c bus 3 .\n");
+    
+}
+
+buf[0] = 0x00;
+if (write(file,buf,1) != 1) 
+{
+    //ERROR HANDLING: i2c transaction failed 
+    printf("Failed to write to the i2c bus 4 .\n");
+    
+}
+
+*/
+
+system("i2cset -y 2 0x70 0x21");
+sleep(0.1);
+system("i2cset -y 2 0x70 0x81");
+sleep(0.1);
+system("i2cset -y 2 0x70 0xEF");
+sleep(0.1);
+system("i2cset -y 2 0x70 0x00");
+sleep(0.1);
+system("i2cset -y 2 0x70 0x00 0x00");
+sleep(0.1);
+system("i2cset -y 2 0x70 0x02 0x00");
+sleep(0.1);
+system("i2cset -y 2 0x70 0x04 0x00");
+sleep(0.1);
+system("i2cset -y 2 0x70 0x06 0x00");
+sleep(0.1);
+system("i2cset -y 2 0x70 0x08 0x00");
+sleep(0.1);
+
+
+for(int i = 0; i < 1000;i++)
+{
+	showNum(i);
+	sleep(0.5);
+}
+
+
+
+//buf[0] = 0x00;
+//buf[1] = charmap[a/10];
+
+/*
+if (write(file,buf,2) != 1) 
+{
+    // ERROR HANDLING: i2c transaction failed 
+    printf("Failed to write to the i2c bus 5 .\n");
+    //i2cset -y 2 0x70 0x00 0xFF
+	
+	char command[30] = "i2cset -y 2 0x70 0x00 ";
+	strcat(command,charmap[(a/10)]);
+	
+	printf("%d command :  %s \n",a/10, command);
+
+    system(command);
+    
+}
+
+
+//buf[0] = 0x04;
+//buf[1] = charmap[a%10];
+
+if (write(file,buf,2) != 1) 
+{
+    // ERROR HANDLING: i2c transaction failed 
+    printf("Failed to write to the i2c bus 6 .\n");
+    //i2cset -y 2 0x70 0x00 0xFF
+	
+	char command1[30] = "i2cset -y 2 0x70 0x02 ";
+	strcat(command1,charmap[(a%10)]);
+	printf("%d command1 :  %s \n",a%10, command1);
+
+    system(command1);
+    
+}
+
+*/
+
+
+
+
+	
+	
+}
+
+void showNum(int a)
+
+{
+	printf("Display Num:  %d  \n",a);
+	sleep(0.2);
+	sleep(0.2);
+
+if(a < 10)
+{
+	system("i2cset -y 2 0x70 0x00 0x3F");
+	sleep(0.1);
+	system("i2cset -y 2 0x70 0x02 0x3F");
+	sleep(0.1);
+	system("i2cset -y 2 0x70 0x04 0x00");
+	sleep(0.1);
+	system("i2cset -y 2 0x70 0x06 0x3F");
+	sleep(0.1);
+	char command[30] = "i2cset -y 2 0x70 0x08 ";
+		strcat(command,charmap[(a%10)]);
+		printf("%d command :  %s \n",a%10, command);
+		system(command);
+
+
+}
+
+else if(a < 100)
+{
+	system("i2cset -y 2 0x70 0x00 0x3F");
+	sleep(0.1);
+	system("i2cset -y 2 0x70 0x02 0x3F");
+	sleep(0.1);
+	system("i2cset -y 2 0x70 0x04 0x00");
+	sleep(0.1);
+	char command[30] = "i2cset -y 2 0x70 0x06 ";
+	strcat(command,charmap[(a/10)]);
+	printf("%d command :  %s \n",a/10, command);
+	system(command);
+	sleep(0.1);
+	char command1[30] = "i2cset -y 2 0x70 0x08 ";
+	strcat(command1,charmap[(a%10)]);
+	printf("%d command :  %s \n",a%10, command1);
+	system(command1);
+
+
+}
+
+else if(a < 1000)
+{
+	system("i2cset -y 2 0x70 0x00 0x3F");
+	sleep(0.1);
+	char command2[30] = "i2cset -y 2 0x70 0x02 ";
+	strcat(command2,charmap[(a/100)]);
+	printf("%d command2 :  %s \n",a/100, command2);
+	system(command2);
+	sleep(0.1);
+	system("i2cset -y 2 0x70 0x04 0x00");
+	sleep(0.1);
+	char command[30] = "i2cset -y 2 0x70 0x06 ";
+	strcat(command,charmap[((a/10)%10)]);
+	printf("%d command :  %s \n",(a/10)%10, command);
+	system(command);
+	sleep(0.1);
+	char command1[30] = "i2cset -y 2 0x70 0x08 ";
+	strcat(command1,charmap[(a%10)]);
+	printf("%d command :  %s \n",a%10, command1);
+	system(command1);
+
+
+}
+
+sleep(0.1);
+
+}
