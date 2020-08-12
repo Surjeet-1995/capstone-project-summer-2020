@@ -83,7 +83,8 @@ static const char* charmap[] = {
 
 int main(void)  
 {  
-	
+	system("config-pin P9.13 uart >/dev/null 2>&1");
+   	system("config-pin P9.11 uart >/dev/null 2>&1");
 	 if ((file = open("/dev/ttyO4", O_RDWR))<0) // Try opening file in Read Write mode
     {
         printf("UART: Failed to open the file.\n"); //A message Print
@@ -294,10 +295,13 @@ int main(void)
 		tcflush(file, TCIFLUSH); // discard file information not transmitted
 		strcpy(buf, "A letter has been removed. The current letter Count is "); // Copy a string in buf char array
 		nbytes = strlen(buf); // Store size of buf array in nbytes
+		sleep(2);
 		bytes_written = write(file, buf, nbytes);	
 		//printf("Bytes Written %d \n",bytes_written);
+		sleep(1);
 		sprintf(buf, "%d", letterCount); // Convert number to char array
 		nbytes = strlen(buf); // Store size of buf array in nbytes
+		sleep(1);
 		bytes_written = write(file, buf, nbytes);
 		
 		sleep(1);
