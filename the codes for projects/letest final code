@@ -1,0 +1,446 @@
+#include <iobb.h> // Library to access GPIO
+#include <time.h>  //Time Library   
+#include <stdio.h> // Standard IO library
+#include <unistd.h> //defines miscellaneous symbolic constants and types, and declares miscellaneous functions
+#include <stdlib.h> //Includes some Standard C Libraries used for trigerring Command line
+#include <string.h> // For using String Functions
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <errno.h>
+#include <linux/i2c.h>
+#include <linux/i2c-dev.h>
+#include <sys/ioctl.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdio.h> //Standard C input Output Library
+#include <unistd.h> //defines miscellaneous symbolic constants and types, and declares miscellaneous functions
+#include <string.h> //C Library for various String Operations
+#include <termios.h> // Contains the definitions used by the terminal I/O interfaces 
+
+#include <sys/types.h> //definitions for types like size_t , ssize_t
+#include <sys/stat.h> //header defines the structure of the data returned by the functions fstat(), lstat(), and stat(), give file size
+#include <fcntl.h> // FIle control, Open, clos
+#include <stdbool.h> 
+#include <stdio.h> //Standard C input Output Library
+#include <unistd.h> //defines miscellaneous symbolic constants and types, and declares miscellaneous functions
+#include <string.h> //C Library for various String Operations
+#include <termios.h> // Contains the definitions used by the terminal I/O interfaces 
+
+#include <sys/types.h> //definitions for types like size_t , ssize_t
+#include <sys/stat.h> //header defines the structure of the data returned by the functions fstat(), lstat(), and stat(), give file size
+#include <fcntl.h> // FIle control, Open, close
+
+
+
+int file, i; // Variable integers
+char receive[100]; // declare a char array for receiving data
+char buf[100]; // A buffer char array to store temporary data
+
+size_t nbytes; //size_t is an unsigned integer data type used for storing size
+ssize_t bytes_written; // //size_t is an signed integer data type used for storing size
+
+
+long int start, stop, count;
+
+clock_t before, end;
+
+clock_t onlinePing; // To track time of online ping
+
+int letterCount = 0;  // To store letter count
+int letterCountOld=0; // To store old value of Letter Count
+int displaynum = 0;
+
+int cflag1 = 1; // Flag to stabilize count
+int cflag2 = 1;
+
+int distance1, distance2;
+int sens = 0;
+
+void showNum(int a);
+
+static const char* charmap[] = { 
+
+  "0x3F",   // 0
+  "0x06",   // 1
+  "0x5B",   // 2
+  "0x4F",   // 3
+  "0x66",   // 4
+  "0x6D",   // 5
+  "0x7D",   // 6
+  "0x07",   // 7
+  "0x7F",   // 8
+  "0x6F",   // 9
+  "0x77",   // A
+  "0x7C",   // B
+  "0x39",   // C
+  "0x5E",   // D
+  "0x79",   // E
+  "0x71",   // F
+  "0x00",   // space
+  "0x40",   // minus
+};
+
+int main(void)  
+{  
+	
+	 if ((file = open("/dev/ttyO4", O_RDWR))<0) // Try opening file in Read Write mode
+    {
+        printf("UART: Failed to open the file.\n"); //A message Print
+        return 0;
+    }
+
+    //
+    struct termios options; // the termios structure is vital
+    tcgetattr(file, &options); // sets the parameters associated with file
+
+    // Set up the communications options:
+    // 9600 baud, 8-bit, enable receiver, no modem control lines
+    options.c_cflag = B9600 | CS8 | CREAD | CLOCAL;
+    options.c_iflag = IGNPAR | ICRNL; // ignore partity errors, CR -> newline
+    tcflush(file, TCIFLUSH); // discard file information not transmitted
+    tcsetattr(file, TCSANOW, &options); // changes occur immmediately
+
+
+  iolib_init();  
+  iolib_setdir(8, 10, DigitalOut); 
+  pin_low(8, 10); 
+  iolib_setdir(8, 9, DigitalIn);  
+  
+  
+  iolib_setdir(8, 12, DigitalOut); 
+  pin_low(8, 12); 
+  iolib_setdir(8, 11, DigitalIn); 
+  
+  
+	system("i2cset -y 2 0x70 0x21");
+	sleep(0.2);
+	system("i2cset -y 2 0x70 0x81");
+	sleep(0.2);
+	system("i2cset -y 2 0x70 0xEF");
+	sleep(0.2);
+	system("i2cset -y 2 0x70 0x00");
+	sleep(0.2);
+	system("i2cset -y 2 0x70 0x00 0x00");
+	sleep(0.2);
+	system("i2cset -y 2 0x70 0x02 0x00");
+	sleep(0.2);
+	system("i2cset -y 2 0x70 0x04 0x00");
+	sleep(0.2);
+	system("i2cset -y 2 0x70 0x06 0x00");
+	sleep(0.2);
+	system("i2cset -y 2 0x70 0x08 0x00");
+	sleep(0.2);
+  
+  
+  printf("STARTED NEW\n");
+  iolib_delay_ms(500);
+  
+  onlinePing = clock(); //Store Starting Time
+  
+  while(1)  
+  {  
+	printf("TRIGERRING US 1  - - ");
+    pin_high(8, 10);  
+    usleep(10); 
+    pin_low(8, 10);
+    
+    //iolib_delay_ms(1);
+    while(is_low(8, 9))
+    {		//printf(".");
+			count+= 1;
+			before = clock();
+			
+			if(count > 20000)
+			{
+				printf("Kindly Check Wiring of US 1\n");
+				count = 0;
+				break;
+			}
+			
+			
+	}
+	
+	count = 0;
+	
+	while(is_high(8, 9))
+	{	
+		//printf("_");
+		count += 1;
+		end = clock();
+		if(count > 20000)
+			{
+				printf("Kindly Check Wiring of US 1 #\n");
+				count = 0;
+				break;
+			}
+			
+	}
+    
+    clock_t difference = end - before;
+    
+    if( count > 0)
+    {
+    //printf("%d    ",before);
+    //printf("%d    ",end);
+    //printf("%d    Distance 1: ",difference);
+    distance1 = difference/30;
+    printf("Distnace 1: %d cm. \n",distance1);
+	}
+    
+    //printf("\n");
+    pin_low(8, 10);
+    iolib_delay_ms(100);
+    start = 0;
+    count=0;
+    
+    //////////////////////////////////////////////////////////////////////////
+    
+    printf("TRIGERRING US 2 - - ");
+    pin_high(8, 12);  
+    usleep(10); 
+    pin_low(8, 12);
+    
+    //iolib_delay_ms(1);
+    while(is_low(8, 11))
+    {		//printf(".");
+			count+= 1;
+			before = clock();
+			
+			if(count > 20000)
+			{
+				printf("Kindly Check Wiring of US 2\n");
+				count = 0;
+				break;
+			}
+			
+			
+	}
+	count = 0;
+	while(is_high(8, 11))
+	{	
+		//printf("_");
+		count += 1;
+		end = clock();
+		if(count > 20000)
+			{
+				printf("Kindly Check Wiring of US 2 # \n");
+				count = 0;
+				break;
+			}
+			
+	}
+    
+    int difference2 = end - before;
+    
+    if( count > 0)
+    {
+    //printf("%d    ",before);
+    //printf("%d    ",end);
+    //printf("%d    Distance 2: ",difference);
+    distance2 = difference2/30;
+    printf("Distance 2: %d cm. \n",distance2);
+	}
+    
+    //printf("\n");
+    pin_low(8, 12);
+    iolib_delay_ms(100);
+    start = 0;
+    count=0;
+    
+    //iolib_delay_ms(500);
+    iolib_delay_ms(500);
+    //sleep(1);
+    
+    
+    //////////////////////////////////////////////////////////////////////////////////////////
+    
+    
+	
+	
+    
+    if(distance1 < 10 && cflag1 == 1) // If  Ultrasonic value less than 10, (Letter sensed )
+    {
+		letterCount += 1; // Increase the count
+		cflag1 = 0; // Make Flag 0 so that 1 letter is not counted as many
+		printf("Got a Letter , Sending SMS\n");
+		//iolib_delay_ms(500); // Small Delay
+		
+		tcflush(file, TCIFLUSH); // discard file information not transmitted,  to clear the ram
+		strcpy(buf, "You have received a letter. The current letter Count is "); // Copy a string in buf char array
+		nbytes = strlen(buf); // Store size of buf array in nbytes
+		bytes_written = write(file, buf, nbytes);	
+		//printf("Bytes Written %d \n",bytes_written);
+		sprintf(buf, "%d", letterCount); // Convert number to char array
+		nbytes = strlen(buf); // Store size of buf array in nbytes
+		bytes_written = write(file, buf, nbytes);
+		
+		
+		sleep(1);
+	}
+	if(distance1 > 10 && cflag1 == 0) // When letter passes and no more in front of sensor
+    {
+		cflag1 = 1; // Make flag as 1 means ready to sense another letter
+	}
+	
+	
+	if(distance2 > 10 && cflag2 == 1) // If  Ultrasonic value more than 10, (Door Open sensed )
+    {
+		letterCount -= 1; // Decrease the count
+		if(letterCount < 0) letterCount =0;
+		cflag2 = 0; // Make Flag 0 so that 1 letter is not counted as many
+		printf("Removed a Letter, Sending SMS \n");
+		//iolib_delay_ms(500); // Small Delay
+		
+		tcflush(file, TCIFLUSH); // discard file information not transmitted
+		strcpy(buf, "A letter has been removed. The current letter Count is   "); // Copy a string in buf char array
+		nbytes = strlen(buf); // Store size of buf array in nbytes
+		bytes_written = write(file, buf, nbytes);	
+		//printf("Bytes Written %d \n",bytes_written);
+		sprintf(buf, "%d", letterCount); // Convert number to char array
+		nbytes = strlen(buf); // Store size of buf array in nbytes
+		bytes_written = write(file, buf, nbytes);
+		
+		sleep(1);
+		
+	}
+	if(distance2 < 10 && cflag2 == 0) // When door closes and distnace is less
+    {
+		cflag2 = 1; // Make flag as 1 means ready to sense another letter
+	}
+	
+	printf("Current Letter Count:  %d  \n", letterCount);
+	printf("Current Display Number: %d \n",displaynum);
+	printf("----------------------------------------\n");
+	
+	if(letterCount != displaynum)
+     {
+		 showNum(letterCount);
+		 displaynum = letterCount;
+	}
+	
+	
+	///////////////////////////////////////////////////
+    
+    if((clock() - onlinePing) > 16*10000) // If LAst ping happened before more than 16 seconds
+    {
+		
+	printf("Online Time \n"); // Time to update values online
+    
+    if(letterCount != letterCountOld) // Check if any new letter has arrived or removed since last time we updated 
+    {
+		
+	printf("Letter Count Changed, Updating Online  \n"); 
+    char d[5]; // A char array to store count
+	
+	char c[] = "curl \"https://api.thingspeak.com/update.json?api_key=9U5J3NOPMSLJQY1M&field1=";
+	// Above is the base url with Write API key
+	sprintf(d, "%d", letterCount); // Convert number to char array
+	strcat(c,d); // Format BAse url to add new letter count
+	strcat(c,"\"");// Add termination
+	
+	printf("#%s#", c); // SHow the final link at Stdout
+	
+	system(c); // Ping the Web link using Command line
+	
+     //system("curl \"https://api.thingspeak.com/update.json?api_key=9U5J3NOPMSLJQY1M&field1=153\"");
+     
+     printf("\n Done \n"); // Print done
+     sleep(1);
+     letterCountOld = letterCount;
+	}
+	
+	onlinePing = clock(); // Update the new Online ping time
+     
+	}
+     
+     //////////////////////////////////////////////////////////////////////
+     
+     
+    
+    
+    
+      
+  }  
+  iolib_free();  
+  return(0);  
+  
+  
+}  
+
+void showNum(int a)
+
+{
+	printf("Updating Display Num to:  %d  \n",a);
+	iolib_delay_ms(100);
+	//sleep(2);
+
+if(a < 10)
+{
+	system("i2cset -y 2 0x70 0x00 0x3F");
+	sleep(0.1);
+	system("i2cset -y 2 0x70 0x02 0x3F");
+	sleep(0.1);
+	system("i2cset -y 2 0x70 0x04 0x00");
+	sleep(0.1);
+	system("i2cset -y 2 0x70 0x06 0x3F");
+	sleep(0.1);
+	char command[30] = "i2cset -y 2 0x70 0x08 ";
+		strcat(command,charmap[(a%10)]);
+		printf("%d command :  %s \n",a%10, command);
+		system(command);
+
+
+}
+
+else if(a < 100)
+{
+	system("i2cset -y 2 0x70 0x00 0x3F");
+	sleep(0.1);
+	system("i2cset -y 2 0x70 0x02 0x3F");
+	sleep(0.1);
+	system("i2cset -y 2 0x70 0x04 0x00");
+	sleep(0.1);
+	char command[30] = "i2cset -y 2 0x70 0x06 ";
+	strcat(command,charmap[(a/10)]);
+	printf("%d command :  %s \n",a/10, command);
+	system(command);
+	sleep(0.1);
+	char command1[30] = "i2cset -y 2 0x70 0x08 ";
+	strcat(command1,charmap[(a%10)]);
+	printf("%d command :  %s \n",a%10, command1);
+	system(command1);
+
+
+}
+
+else if(a < 1000)
+{
+	system("i2cset -y 2 0x70 0x00 0x3F");
+	sleep(0.1);
+	char command2[30] = "i2cset -y 2 0x70 0x02 ";
+	strcat(command2,charmap[(a/100)]);
+	printf("%d command2 :  %s \n",a/100, command2);
+	system(command2);
+	sleep(0.1);
+	system("i2cset -y 2 0x70 0x04 0x00");
+	sleep(0.1);
+	char command[30] = "i2cset -y 2 0x70 0x06 ";
+	strcat(command,charmap[((a/10)%10)]);
+	printf("%d command :  %s \n",(a/10)%10, command);
+	system(command);
+	sleep(0.1);
+	char command1[30] = "i2cset -y 2 0x70 0x08 ";
+	strcat(command1,charmap[(a%10)]);
+	printf("%d command :  %s \n",a%10, command1);
+	system(command1);
+
+
+}
+
+iolib_delay_ms(100);
+//sleep(3);
+
+}
+
+
