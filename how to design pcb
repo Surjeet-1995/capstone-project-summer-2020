@@ -1,0 +1,17 @@
+// to design PCB in easyEda software we first need to design the schematics of circuit.
+
+// designing circuit is easy way however you can go to file > create > pcb design on homepage to directly design pcb without creating schematics.
+
+// after  creating schematics go to > convert to pcb option in pcb tool of easyEDA.
+
+// this tool will convert the schematics into pcb layer.
+
+// first you need to arrange the components in layer. 
+
+// track and via are the most used tool in pcb designing to make connection.
+
+// Easyeda has the autoroute feature from which we can get help of software automated  system, who create routes for our design.
+
+// copper pour option is in pcb tool
+
+// we can also import and export this file in different format.
